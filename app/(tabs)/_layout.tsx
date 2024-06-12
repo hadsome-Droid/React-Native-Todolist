@@ -14,6 +14,15 @@ export default function TabLayout() {
         tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
         headerShown: false,
       }}>
+        <Tabs.Screen
+            name="todolist"
+            options={{
+                title: 'Todolist',
+                tabBarIcon: ({ color, focused }) => (
+                    <TabBarIcon name={focused ? 'finger-print' : 'bonfire'} color={color} />
+                ),
+            }}
+        />
       <Tabs.Screen
         name="index"
         options={{
