@@ -8,12 +8,13 @@ type Props = {
     isIcon?: boolean
     iconName?: ComponentProps<typeof CustomIcon>['name']
     color?: string
+    sizeIcon?: number
 }
 
-const CustomButton = ({onPress, title, isIcon, iconName = 'trash', color}: Props) => (
+const CustomButton = ({onPress, title, isIcon, iconName = 'trash', color, sizeIcon}: Props) => (
     <TouchableOpacity onPress={onPress} style={styles.buttonContainer}>
         {title && <Text style={styles.buttonText}>{title}</Text>}
-        {isIcon && <CustomIcon name={iconName} style={[styles.iconStyle, {color: color}]}/>}
+        {isIcon && <CustomIcon name={iconName} style={[styles.iconStyle, {color: color}]} size={sizeIcon}/>}
     </TouchableOpacity>
 );
 

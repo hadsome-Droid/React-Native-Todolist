@@ -7,75 +7,80 @@ import {HelloWave} from "@/components/HelloWave";
 import {useState} from "react";
 import CustomButton from "@/components/customButton/CustomButton";
 import {Input} from "@/components/input/Input";
+import {TaskType} from "@/app/(tabs)/todolistsApp";
+
+type Props = {
+    todolistId: number
+    title: string
+    tasks: TaskType[]
+    addTask: (todolistId: number, title: string) => void
+    deleteTask: (todolistId: number, taskId: number) => void
+    changeTaskStatus: (todolistId: number, taskId: number, taskStatus: boolean) => void
+    changeTaskTitle: (todolistId: number, taskId: number, newTitle: string) => void
+}
 
 
-export default function Todolist() {
+export default function Todolist({
+                                     todolistId,
+                                     title,
+                                     tasks,
+                                     addTask,
+                                     deleteTask,
+                                     changeTaskTitle,
+                                     changeTaskStatus
+                                 }: Props) {
     const [value, setValue] = useState('')
     const [show, setShow] = useState(0)
-    const [newTitle, setNewTitle] = useState('')
 
-    const [tasks, setTasks] = useState([
-        {id: 1, title: 'Html', isDone: true},
-        {id: 2, title: 'CSS', isDone: true},
-        {id: 3, title: 'React Native', isDone: false},
-        {id: 4, title: 'JS', isDone: true},
-        {id: 5, title: 'React', isDone: false},
-    ])
 
-    const addTask = () => {
-        const newTask = {id: tasks.length + 1, title: value, isDone: false}
-        if (value !== '' && value !== ' ') {
-            setTasks([newTask, ...tasks])
-            setValue('')
-        }
+    const createTask = () => {
+        addTask(todolistId, value)
     }
 
-    const deleteTask = (id: number) => {
-        setTasks(tasks.filter(task => task.id !== id))
+    const removeTask = (id: number) => {
+        deleteTask(todolistId, id)
     }
 
     const changeStatus = (id: number, isDone: boolean) => {
-        setTasks(tasks.map(task => task.id === id ? {...task, isDone: !isDone} : task))
+        changeTaskStatus(todolistId, id, isDone)
     }
 
     const changeTitle = (id: number, newTitle: string) => {
-        setTasks(tasks.map((task) => task.id === id ? {...task, title: newTitle} : task))
-        setShow(0)
+        changeTaskTitle(todolistId, id, newTitle)
     }
 
-    return (
-        <ParallaxScrollView headerImage={<Image
-            source={require('@/assets/images/partial-react-logo.png')}
-            style={styles.reactLogo}
-        />} headerBackgroundColor={{light: '#A1CEDC', dark: '#1D3D47'}}>
+    return (<>
             <ThemedView style={styles.titleContainer}>
-                <ThemedText type="title">TodoList!</ThemedText>
+                <ThemedText type="title">{title}</ThemedText>
                 <HelloWave/>
             </ThemedView>
             <ThemedView style={[styles.stepContainer, styles.boxTodolist]}>
                 <ThemedView style={styles.stepContainer}>
                     <TextInput value={value} style={[styles.inputStyle]} onChangeText={setValue}
                                placeholder={'Text Input'}/>
-                    <Button color={'#ff8906'} title={'Add Task'} onPress={addTask} disabled={value == ''}/>
+                    <Button color={'#ff8906'} title={'Add Task'} onPress={createTask} disabled={value == ''}/>
                 </ThemedView>
                 <ThemedView style={[styles.stepContainer]}>
                     {tasks.map((task) => {
                         return <ThemedView style={[styles.stepContainer, styles.boxTask,]} key={task.id}>
-                            <Checkbox value={task.isDone} onValueChange={() => changeStatus(task.id, task.isDone)}/>
+                            <Checkbox value={task.isDone} style={{borderRadius: 50}}
+                                      onValueChange={() => changeStatus(task.id, task.isDone)}/>
                             {show === task.id
                                 ? <Input id={task.id} title={task.title} changeTitle={changeTitle}/>
                                 : <ThemedText type={'default'} key={task.id} onPress={() => setShow(task.id)}>
                                     {task.title}
                                     <CustomButton title={''}
-                                                  onPress={() => deleteTask(task.id)}
+                                                  onPress={() => removeTask(task.id)}
                                                   isIcon={true}
-                                                  iconName={'trash'}/></ThemedText>
+                                                  iconName={'trash'}
+                                                  color={'red'}/></ThemedText>
                             }
                         </ThemedView>
                     })}
                 </ThemedView>
             </ThemedView>
-        </ParallaxScrollView>
+        </>
+
     )
 }
 
@@ -94,13 +99,6 @@ const styles = StyleSheet.create({
     boxTodolist: {
         alignItems: 'center',
         justifyContent: 'center'
-    },
-    reactLogo: {
-        height: 178,
-        width: 290,
-        bottom: 0,
-        left: 0,
-        position: 'absolute',
     },
     boxTask: {
         flexDirection: 'row',

@@ -17,7 +17,7 @@ export const Input = ({title, changeTitle, id}: Props) => {
     return (
         <View style={styles.viewStyle}>
             <TextInput value={value} onChangeText={(text) => onChange(text)} style={styles.inputStyle}/>
-            <CustomButton onPress={() => changeTitle(id, value)} isIcon iconName={'checkmark'} color={'green'}/>
+            <CustomButton onPress={() => changeTitle(id, value)} isIcon iconName={'checkmark-circle-outline'} color={'green'} sizeIcon={24}/>
         </View>
     );
 };
@@ -33,7 +33,9 @@ const styles = StyleSheet.create({
     inputStyle: {
         fontSize: 18,
         color: 'white',
-        width: 150,
-        backgroundColor: "#c5cfc2",
+        width: 130,
+        backgroundColor: 'transparent',
+        borderBottomWidth: 2,
+        borderBottomColor: '#469bf1',
     },
 })
