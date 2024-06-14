@@ -6,10 +6,13 @@ import {ThemedText} from "@/components/ThemedText";
 import {HelloWave} from "@/components/HelloWave";
 import {useState} from "react";
 import CustomButton from "@/components/customButton/CustomButton";
+import {Input} from "@/components/input/Input";
 
 
 export default function Todolist() {
     const [value, setValue] = useState('')
+    const [show, setShow] = useState(0)
+    const [newTitle, setNewTitle] = useState('')
 
     const [tasks, setTasks] = useState([
         {id: 1, title: 'Html', isDone: true},
@@ -21,7 +24,7 @@ export default function Todolist() {
 
     const addTask = () => {
         const newTask = {id: tasks.length + 1, title: value, isDone: false}
-        if(value !== '' && value !== ' '){
+        if (value !== '' && value !== ' ') {
             setTasks([newTask, ...tasks])
             setValue('')
         }
@@ -35,13 +38,17 @@ export default function Todolist() {
         setTasks(tasks.map(task => task.id === id ? {...task, isDone: !isDone} : task))
     }
 
+    const changeTitle = (id: number, newTitle: string) => {
+        setTasks(tasks.map((task) => task.id === id ? {...task, title: newTitle} : task))
+        setShow(0)
+    }
+
     return (
         <ParallaxScrollView headerImage={<Image
             source={require('@/assets/images/partial-react-logo.png')}
             style={styles.reactLogo}
         />} headerBackgroundColor={{light: '#A1CEDC', dark: '#1D3D47'}}>
             <ThemedView style={styles.titleContainer}>
-                <ThemedText type="title">TodoList!</ThemedText>
                 <ThemedText type="title">TodoList!</ThemedText>
                 <HelloWave/>
             </ThemedView>
@@ -53,12 +60,17 @@ export default function Todolist() {
                 </ThemedView>
                 <ThemedView style={[styles.stepContainer]}>
                     {tasks.map((task) => {
-                        return <ThemedView style={[styles.stepContainer, styles.boxTask, ]} key={task.id}>
+                        return <ThemedView style={[styles.stepContainer, styles.boxTask,]} key={task.id}>
                             <Checkbox value={task.isDone} onValueChange={() => changeStatus(task.id, task.isDone)}/>
-                            <ThemedText type={'default'} key={task.id} >{task.title}<CustomButton title={''}
-                                                                                                 onPress={() => deleteTask(task.id)}
-                                                                                                 isIcon={true}/></ThemedText>
-
+                            {show === task.id
+                                ? <Input id={task.id} title={task.title} changeTitle={changeTitle}/>
+                                : <ThemedText type={'default'} key={task.id} onPress={() => setShow(task.id)}>
+                                    {task.title}
+                                    <CustomButton title={''}
+                                                  onPress={() => deleteTask(task.id)}
+                                                  isIcon={true}
+                                                  iconName={'trash'}/></ThemedText>
+                            }
                         </ThemedView>
                     })}
                 </ThemedView>
