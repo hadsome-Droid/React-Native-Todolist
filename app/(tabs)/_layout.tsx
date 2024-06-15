@@ -5,6 +5,7 @@ import { TabBarIcon } from '@/components/navigation/TabBarIcon';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 
+
 export default function TabLayout() {
   const colorScheme = useColorScheme();
 
@@ -15,9 +16,9 @@ export default function TabLayout() {
         headerShown: false,
       }}>
         <Tabs.Screen
-            name="todolist"
+            name="todolistsApp"
             options={{
-                title: 'Todolist',
+                title: 'Todolists',
                 tabBarIcon: ({ color, focused }) => (
                     <TabBarIcon name={focused ? 'finger-print' : 'bonfire'} color={color} />
                 ),

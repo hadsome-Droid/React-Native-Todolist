@@ -1,7 +1,8 @@
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 import React, {useState} from 'react';
 import {Image, StyleSheet} from "react-native";
-import Todolist from "@/app/(tabs)/todolist";
+import Todolist from "@/components/todolists/todolist";
+import { ThemedView } from '@/components/ThemedView';
 
 export type TaskType = {
     id: number
@@ -9,9 +10,9 @@ export type TaskType = {
     isDone: boolean
 }
 
-export const TodolistsApp = () => {
+export default function TodolistsApp() {
     const [value, setValue] = useState('')
-    const [show, setShow] = useState(0)
+
 
     let todolistID1 = 1
     let todolistID2 = 2
@@ -42,7 +43,7 @@ export const TodolistsApp = () => {
 
     const addTask = (todolistId: number, title: string) => {
         const newTask = {id: tasks[todolistId].length + 1, title, isDone: false}
-        if (value.trim() !== '') {
+        if (title.trim() !== '') {
             setTasks({...tasks, [todolistId]: [newTask, ...tasks[todolistId]]})
             setValue('')
         }
@@ -60,11 +61,11 @@ export const TodolistsApp = () => {
     }
 
     const changeTitle = (todolistId: number, taskId: number, newTitle: string) => {
+        console.log(newTitle)
         setTasks({
             ...tasks,
             [todolistId]: tasks[todolistId].map((task) => task.id === taskId ? {...task, title: newTitle} : task)
         })
-        setShow(0)
     }
 
     return (
@@ -72,23 +73,29 @@ export const TodolistsApp = () => {
             source={require('@/assets/images/partial-react-logo.png')}
             style={styles.reactLogo}
         />} headerBackgroundColor={{light: '#A1CEDC', dark: '#1D3D47'}}>
-            {todolists.map(todolist => {
-                return <Todolist
-                    key={todolist.id}
-                    todolistId={todolist.id}
-                    title={todolist.title}
-                    tasks={tasks[todolist.id]}
-                    addTask={addTask}
-                    deleteTask={deleteTask}
-                    changeTaskStatus={changeStatus}
-                    changeTaskTitle={changeTitle}
-                />
-            })}
+            <ThemedView style={styles.bgc}>
+                {todolists.map(todolist => {
+                    return <Todolist
+                        key={todolist.id}
+                        todolistId={todolist.id}
+                        title={todolist.title}
+                        tasks={tasks[todolist.id]}
+                        addTask={addTask}
+                        deleteTask={deleteTask}
+                        changeTaskStatus={changeStatus}
+                        changeTaskTitle={changeTitle}
+                    />
+                })}
+            </ThemedView>
+
         </ParallaxScrollView>
     );
 };
 
 const styles = StyleSheet.create({
+    bgc: {
+       backgroundColor: 'white'
+    },
     reactLogo: {
         height: 178,
         width: 290,
