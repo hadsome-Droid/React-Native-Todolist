@@ -1,10 +1,9 @@
-import ParallaxScrollView from "@/components/ParallaxScrollView";
-import {Alert, Button, Image, StyleSheet, TextInput,} from "react-native";
+import {Button, StyleSheet, TextInput,} from "react-native";
 import Checkbox from 'expo-checkbox';
 import {ThemedView} from "@/components/ThemedView";
 import {ThemedText} from "@/components/ThemedText";
 import {HelloWave} from "@/components/HelloWave";
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import CustomButton from "@/components/customButton/CustomButton";
 import {Input} from "@/components/input/Input";
 import {TaskType} from "@/app/(tabs)/todolistsApp";
@@ -19,6 +18,8 @@ type Props = {
     deleteTask: (todolistId: number, taskId: number) => void
     changeTaskStatus: (todolistId: number, taskId: number, taskStatus: boolean) => void
     changeTaskTitle: (todolistId: number, taskId: number, newTitle: string) => void
+    changeTodolistTitle: (todolistId: number, newTitle: string) => void
+    removeTodolist: (todolistId: number) => void
 }
 
 
@@ -29,12 +30,18 @@ export default function Todolist({
                                      addTask,
                                      deleteTask,
                                      changeTaskTitle,
-                                     changeTaskStatus
+                                     changeTaskStatus,
+                                     changeTodolistTitle,
+                                     removeTodolist
                                  }: Props) {
     const [value, setValue] = useState('')
     const [show, setShow] = useState(0)
-    const [testTasks, setTestTasks] = useState(tasks)
-    const [selectedButton, setSelectedButton] = useState('All');
+    const [testTasks, setTestTasks] = useState<TaskType[]>(tasks)
+    const [selectedButton, setSelectedButton] = useState<Filter>('all');
+
+    useEffect(() => {
+        setTestTasks(changeFilter(selectedButton));
+    }, [tasks, selectedButton]);
 
     const handlePress = (buttonName: Filter) => {
         setSelectedButton(buttonName);
@@ -48,6 +55,7 @@ export default function Todolist({
 
     const createTask = () => {
         addTask(todolistId, value)
+        setValue('')
     }
 
     const removeTask = (id: number) => {
@@ -77,12 +85,23 @@ export default function Todolist({
         }
     }
 
+    const handlerChangeTodolistTitle = (todolistId: number, newTitle: string) => {
+        changeTodolistTitle(todolistId, newTitle)
+        setShow(0)
+    }
+
+    const removeHandlerTodolist = () => {
+        removeTodolist(todolistId)
+    }
 
 
     return (<ThemedView style={styles.bgc}>
             <ThemedView style={styles.titleContainer}>
-                <ThemedText type="title">{title}</ThemedText>
-                <HelloWave/>
+                {show === todolistId
+                    ? <Input id={todolistId} title={title} changeTitle={handlerChangeTodolistTitle}/>
+                    : <><ThemedText type="title" onPress={() => setShow(todolistId)}>{title}</ThemedText><HelloWave/> <CustomButton onPress={removeHandlerTodolist} isIcon iconName={'close'} sizeIcon={24}/></>
+                }
+
             </ThemedView>
             <ThemedView style={[styles.stepContainer, styles.boxTodolist]}>
                 <ThemedView style={styles.stepContainer}>
