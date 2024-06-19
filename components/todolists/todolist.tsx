@@ -7,19 +7,20 @@ import {useEffect, useState} from "react";
 import CustomButton from "@/components/customButton/CustomButton";
 import {Input} from "@/components/input/Input";
 import {TaskType} from "@/app/(tabs)/todolistsApp";
+import {useGetTasksQuery} from "@/services/tasks-api";
 
 type Filter = 'all' | 'active' | 'completed'
 
 type Props = {
-    todolistId: number
+    todolistId: string
     title: string
-    tasks: TaskType[]
-    addTask: (todolistId: number, title: string) => void
-    deleteTask: (todolistId: number, taskId: number) => void
-    changeTaskStatus: (todolistId: number, taskId: number, taskStatus: boolean) => void
-    changeTaskTitle: (todolistId: number, taskId: number, newTitle: string) => void
-    changeTodolistTitle: (todolistId: number, newTitle: string) => void
-    removeTodolist: (todolistId: number) => void
+    tasks?: TaskType[]
+    addTask: (todolistId: string, title: string) => void
+    deleteTask: (todolistId: string, taskId: string) => void
+    changeTaskStatus: (todolistId: string, taskId: string, taskStatus: boolean) => void
+    changeTaskTitle: (todolistId: string, taskId: string, newTitle: string) => void
+    changeTodolistTitle: (todolistId: string, newTitle: string) => void
+    removeTodolist: (todolistId: string) => void
 }
 
 
@@ -35,17 +36,20 @@ export default function Todolist({
                                      removeTodolist
                                  }: Props) {
     const [value, setValue] = useState('')
-    const [show, setShow] = useState(0)
-    const [testTasks, setTestTasks] = useState<TaskType[]>(tasks)
+    const [show, setShow] = useState('')
+    const [testTasks, setTestTasks] = useState<TaskType[]>(tasks || [])
     const [selectedButton, setSelectedButton] = useState<Filter>('all');
 
+    const {data, isLoading, error} = useGetTasksQuery(todolistId)
+    console.log('+++tasks', data.items)
+
     useEffect(() => {
-        setTestTasks(changeFilter(selectedButton));
+        // setTestTasks(changeFilter(selectedButton));
     }, [tasks, selectedButton]);
 
     const handlePress = (buttonName: Filter) => {
         setSelectedButton(buttonName);
-        setTestTasks(changeFilter(buttonName))
+        // setTestTasks(changeFilter(buttonName))
 
     };
 
@@ -58,26 +62,26 @@ export default function Todolist({
         setValue('')
     }
 
-    const removeTask = (id: number) => {
+    const removeTask = (id: string) => {
         deleteTask(todolistId, id)
     }
 
-    const changeStatus = (id: number, isDone: boolean) => {
+    const changeStatus = (id: string, isDone: boolean) => {
         changeTaskStatus(todolistId, id, isDone)
     }
 
-    const changeTitle = (id: number, newTitle: string) => {
+    const changeTitle = (id: string, newTitle: string) => {
         changeTaskTitle(todolistId, id, newTitle)
-        setShow(0)
+        setShow('')
     }
 
     const changeFilter = (title: Filter) => {
         switch (title) {
             case "active": {
-                return tasks.filter(task => !task.isDone)
+                return tasks?.filter(task => !task.isDone)
             }
             case "completed": {
-                return tasks.filter(task => task.isDone)
+                return tasks?.filter(task => task.isDone)
             }
             default: {
                 return tasks
@@ -85,9 +89,9 @@ export default function Todolist({
         }
     }
 
-    const handlerChangeTodolistTitle = (todolistId: number, newTitle: string) => {
+    const handlerChangeTodolistTitle = (todolistId: string, newTitle: string) => {
         changeTodolistTitle(todolistId, newTitle)
-        setShow(0)
+        setShow('')
     }
 
     const removeHandlerTodolist = () => {
@@ -110,7 +114,7 @@ export default function Todolist({
                     <Button color={'#ff8906'} title={'Add Task'} onPress={createTask} disabled={value == ''}/>
                 </ThemedView>
                 <ThemedView style={[styles.stepContainer]}>
-                    {testTasks.map((task) => {
+                    {data.items.map((task: any) => {
                         return <ThemedView style={[styles.stepContainer, styles.boxTask,]} key={task.id}>
                             <Checkbox value={task.isDone} style={{borderRadius: 50}}
                                       onValueChange={() => changeStatus(task.id, task.isDone)}/>

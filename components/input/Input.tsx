@@ -3,9 +3,9 @@ import {StyleSheet, TextInput, View} from "react-native";
 import CustomButton from "@/components/customButton/CustomButton";
 
 type Props = {
-    id: number
+    id: string
     title: string
-    changeTitle: (taskId: number, title: string) => void
+    changeTitle: (taskId: string, title: string) => void
 }
 
 export const Input = ({title, changeTitle, id}: Props) => {

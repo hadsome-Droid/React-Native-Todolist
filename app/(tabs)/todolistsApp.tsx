@@ -4,14 +4,19 @@ import {Image, StyleSheet, TextInput} from "react-native";
 import Todolist from "@/components/todolists/todolist";
 import { ThemedView } from '@/components/ThemedView';
 import CustomButton from "@/components/customButton/CustomButton";
+import {useGetTodolistsQuery} from "@/services/todolists-api";
+
 
 export type TaskType = {
-    id: number
+    id: string
     title: string
     isDone: boolean
 }
 
 export default function TodolistsApp() {
+    const {data, isLoading} = useGetTodolistsQuery()
+    console.log('+++result',data)
+
     const [value, setValue] = useState('')
 
 
@@ -42,53 +47,53 @@ export default function TodolistsApp() {
         },
     )
 
-    const addTask = (todolistId: number, title: string) => {
-        const newTask = {id: tasks[todolistId].length + 1, title, isDone: false}
-        if (title.trim() !== '') {
-            setTasks({...tasks, [todolistId]: [newTask, ...tasks[todolistId]]})
-        }
+    const addTask = (todolistId: string, title: string) => {
+        // const newTask = {id: tasks[todolistId].length + 1, title, isDone: false}
+        // if (title.trim() !== '') {
+        //     setTasks({...tasks, [todolistId]: [newTask, ...tasks[todolistId]]})
+        // }
     }
 
-    const deleteTask = (todolistId: number, taskId: number) => {
-        setTasks({...tasks, [todolistId]: tasks[todolistId].filter(task => task.id !== taskId)})
+    const deleteTask = (todolistId: string, taskId: string) => {
+        // setTasks({...tasks, [todolistId]: tasks[todolistId].filter(task => task.id !== taskId)})
     }
 
-    const changeStatus = (todolistId: number, taskId: number, isDone: boolean) => {
-        setTasks({
-            ...tasks,
-            [todolistId]: tasks[todolistId].map(task => task.id === taskId ? {...task, isDone: !isDone} : task)
-        })
+    const changeStatus = (todolistId: string, taskId: string, isDone: boolean) => {
+        // setTasks({
+        //     ...tasks,
+        //     [todolistId]: tasks[todolistId].map(task => task.id === taskId ? {...task, isDone: !isDone} : task)
+        // })
     }
 
-    const changeTitle = (todolistId: number, taskId: number, newTitle: string) => {
-        setTasks({
-            ...tasks,
-            [todolistId]: tasks[todolistId].map((task) => task.id === taskId ? {...task, title: newTitle} : task)
-        })
+    const changeTitle = (todolistId: string, taskId: string, newTitle: string) => {
+        // setTasks({
+        //     ...tasks,
+        //     [todolistId]: tasks[todolistId].map((task) => task.id === taskId ? {...task, title: newTitle} : task)
+        // })
     }
 
-    const changeTodolistTitle = (todolistId: number, newTitle: string) => {
-        setTodolists(todolists.map(todolist => todolist.id === todolistId ? {...todolist, title: newTitle} : todolist))
+    const changeTodolistTitle = (todolistId: string, newTitle: string) => {
+        // setTodolists(todolists.map(todolist => todolist.id === todolistId ? {...todolist, title: newTitle} : todolist))
     }
 
     const createTodolist = (title: string) => {
-        const newTodolist = {id: todolists.length + 1, title, filter: 'all'}
-        if (title.trim() !== '') {
-            setTodolists([newTodolist, ...todolists])
-            setTasks({...tasks, [todolists.length + 1]: []})
-            setValue('')
-        }
+        // const newTodolist = {id: todolists.length + 1, title, filter: 'all'}
+        // if (title.trim() !== '') {
+        //     setTodolists([newTodolist, ...todolists])
+        //     setTasks({...tasks, [todolists.length + 1]: []})
+        //     setValue('')
+        // }
     }
 
-    const removeTodolist = (todolistId: number) => {
-        const newTodolist = todolists.filter(todolist => todolist.id !== todolistId)
-        setTodolists(newTodolist)
-
-        delete tasks[todolistId]
-        setTasks({...tasks})
+    const removeTodolist = (todolistId: string) => {
+        // const newTodolist = todolists.filter(todolist => todolist.id !== todolistId)
+        // setTodolists(newTodolist)
+        //
+        // delete tasks[todolistId]
+        // setTasks({...tasks})
     }
-    console.log(todolists)
-    console.log(tasks)
+    // console.log(todolists)
+    // console.log(tasks)
     return (
         <ParallaxScrollView headerImage={<Image
             source={require('@/assets/images/partial-react-logo.png')}
@@ -100,12 +105,12 @@ export default function TodolistsApp() {
                     <CustomButton onPress={() =>createTodolist(value)} title={'Add Todolist'} isIcon iconName={'hammer'}  color={'white'} style={styles.buttonStyle}/>
                 </ThemedView>
 
-                {todolists.map(todolist => {
+                {data?.map(todolist => {
                     return <Todolist
                         key={todolist.id}
                         todolistId={todolist.id}
                         title={todolist.title}
-                        tasks={tasks[todolist.id]}
+                        // tasks={tasks[todolist.id]}
                         addTask={addTask}
                         deleteTask={deleteTask}
                         changeTaskStatus={changeStatus}
