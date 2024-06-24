@@ -13,14 +13,31 @@ export const tasksApi = createApi({
             return headers
         },
     }),
+    tagTypes: ['Tasks'],
     endpoints: builder => {
         return {
             getTasks: builder.query<any, string>({
                 query: (todolistId) => `/todo-lists/${todolistId}/tasks`,
             }),
+            createTask: builder.mutation<any, any>({
+                query: ({todolistId, title}) => ({
+                    url: `/todo-lists/${todolistId}/tasks`,
+                    method: 'POST',
+                    body: {title},
+                }),
+                invalidatesTags: ['Tasks']
+            }),
+            updateTask: builder.mutation<any, any>({
+                query: ({todolistId, taskId}) => ({
+                    url: `/todo-lists/${todolistId}/tasks/${taskId}`,
+                    method: 'PUT',
+                    body: {},
+                }),
+                invalidatesTags: ['Tasks']
+            })
         }
     },
 })
 
 
-export const {useGetTasksQuery} = tasksApi
+export const {useGetTasksQuery,  useCreateTaskMutation, useUpdateTaskMutation} = tasksApi

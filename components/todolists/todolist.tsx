@@ -7,8 +7,7 @@ import {useEffect, useState} from "react";
 import CustomButton from "@/components/customButton/CustomButton";
 import {Input} from "@/components/input/Input";
 import {TaskType} from "@/app/(tabs)/todolistsApp";
-import {useGetTasksQuery} from "@/services/tasks-api";
-
+import {useCreateTaskMutation, useGetTasksQuery} from "@/services/tasks-api";
 type Filter = 'all' | 'active' | 'completed'
 
 type Props = {
@@ -41,11 +40,13 @@ export default function Todolist({
     const [selectedButton, setSelectedButton] = useState<Filter>('all');
 
     const {data, isLoading, error} = useGetTasksQuery(todolistId)
-    console.log('+++tasks', data.items)
+    const [createTask] = useCreateTaskMutation()
 
-    useEffect(() => {
-        // setTestTasks(changeFilter(selectedButton));
-    }, [tasks, selectedButton]);
+    console.log('+++tasks', data?.items)
+
+    // useEffect(() => {
+    //     // setTestTasks(changeFilter(selectedButton));
+    // }, [tasks, selectedButton]);
 
     const handlePress = (buttonName: Filter) => {
         setSelectedButton(buttonName);
@@ -57,8 +58,9 @@ export default function Todolist({
         return selectedButton === buttonName ? [styles.buttonStyle, styles.buttonActive] : [styles.buttonStyle];
     };
 
-    const createTask = () => {
-        addTask(todolistId, value)
+    const createHandlerTask = () => {
+        createTask({todolistId, title: value})
+        // addTask(todolistId, value)
         setValue('')
     }
 
@@ -90,6 +92,8 @@ export default function Todolist({
     }
 
     const handlerChangeTodolistTitle = (todolistId: string, newTitle: string) => {
+        // console.log(todolistId, newTitle)
+
         changeTodolistTitle(todolistId, newTitle)
         setShow('')
     }
@@ -111,10 +115,10 @@ export default function Todolist({
                 <ThemedView style={styles.stepContainer}>
                     <TextInput value={value} style={[styles.inputStyle]} onChangeText={setValue}
                                placeholder={'Text Input'}/>
-                    <Button color={'#ff8906'} title={'Add Task'} onPress={createTask} disabled={value == ''}/>
+                    <Button color={'#ff8906'} title={'Add Task'} onPress={createHandlerTask} disabled={value == ''}/>
                 </ThemedView>
                 <ThemedView style={[styles.stepContainer]}>
-                    {data.items.map((task: any) => {
+                    {data?.items.map((task: any) => {
                         return <ThemedView style={[styles.stepContainer, styles.boxTask,]} key={task.id}>
                             <Checkbox value={task.isDone} style={{borderRadius: 50}}
                                       onValueChange={() => changeStatus(task.id, task.isDone)}/>

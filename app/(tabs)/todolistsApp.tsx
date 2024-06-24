@@ -4,7 +4,11 @@ import {Image, StyleSheet, TextInput} from "react-native";
 import Todolist from "@/components/todolists/todolist";
 import { ThemedView } from '@/components/ThemedView';
 import CustomButton from "@/components/customButton/CustomButton";
-import {useGetTodolistsQuery} from "@/services/todolists-api";
+import {
+    useCreateTodolistMutation,
+    useGetTodolistsQuery, useRemoveTodolistMutation,
+    useUpdateTodolistTitleMutation
+} from "@/services/todolists-api";
 
 
 export type TaskType = {
@@ -15,37 +19,41 @@ export type TaskType = {
 
 export default function TodolistsApp() {
     const {data, isLoading} = useGetTodolistsQuery()
-    console.log('+++result',data)
+    const [updateTodolistTitle] = useUpdateTodolistTitleMutation()
+    const [createTodolist] = useCreateTodolistMutation()
+    const [removeTodolist] = useRemoveTodolistMutation()
+
+    console.log('+++result', data)
 
     const [value, setValue] = useState('')
 
 
-    let todolistID1 = 1
-    let todolistID2 = 2
-
-    const [todolists, setTodolists] = useState([
-        {id: todolistID1, title: 'Todo 1', filter: 'all'},
-        {id: todolistID2, title: 'Todo 2', filter: 'all'}
-    ])
-
-    const [tasks, setTasks] = useState(
-        {
-            [todolistID1]: [
-                {id: 1, title: 'Html', isDone: true},
-                {id: 2, title: 'CSS', isDone: true},
-                {id: 3, title: 'React Native', isDone: false},
-                {id: 4, title: 'JS', isDone: true},
-                {id: 5, title: 'React', isDone: false},
-            ],
-            [todolistID2]: [
-                {id: 1, title: 'By a Car', isDone: true},
-                {id: 2, title: 'Spend all money', isDone: true},
-                {id: 3, title: 'Play all games', isDone: false},
-                {id: 4, title: 'Ride one book', isDone: true},
-                {id: 5, title: 'Wake up early', isDone: false},
-            ]
-        },
-    )
+    // let todolistID1 = 1
+    // let todolistID2 = 2
+    //
+    // const [todolists, setTodolists] = useState([
+    //     {id: todolistID1, title: 'Todo 1', filter: 'all'},
+    //     {id: todolistID2, title: 'Todo 2', filter: 'all'}
+    // ])
+    //
+    // const [tasks, setTasks] = useState(
+    //     {
+    //         [todolistID1]: [
+    //             {id: 1, title: 'Html', isDone: true},
+    //             {id: 2, title: 'CSS', isDone: true},
+    //             {id: 3, title: 'React Native', isDone: false},
+    //             {id: 4, title: 'JS', isDone: true},
+    //             {id: 5, title: 'React', isDone: false},
+    //         ],
+    //         [todolistID2]: [
+    //             {id: 1, title: 'By a Car', isDone: true},
+    //             {id: 2, title: 'Spend all money', isDone: true},
+    //             {id: 3, title: 'Play all games', isDone: false},
+    //             {id: 4, title: 'Ride one book', isDone: true},
+    //             {id: 5, title: 'Wake up early', isDone: false},
+    //         ]
+    //     },
+    // )
 
     const addTask = (todolistId: string, title: string) => {
         // const newTask = {id: tasks[todolistId].length + 1, title, isDone: false}
@@ -72,11 +80,14 @@ export default function TodolistsApp() {
         // })
     }
 
-    const changeTodolistTitle = (todolistId: string, newTitle: string) => {
+    const changeTodolistTitle = (todolistId: string, title: string) => {
+        updateTodolistTitle({id: todolistId, title})
+
         // setTodolists(todolists.map(todolist => todolist.id === todolistId ? {...todolist, title: newTitle} : todolist))
     }
 
-    const createTodolist = (title: string) => {
+    const addTodolist = (title: string) => {
+        createTodolist({title})
         // const newTodolist = {id: todolists.length + 1, title, filter: 'all'}
         // if (title.trim() !== '') {
         //     setTodolists([newTodolist, ...todolists])
@@ -85,7 +96,8 @@ export default function TodolistsApp() {
         // }
     }
 
-    const removeTodolist = (todolistId: string) => {
+    const deleteTodolist = (todolistId: string) => {
+        removeTodolist({id: todolistId})
         // const newTodolist = todolists.filter(todolist => todolist.id !== todolistId)
         // setTodolists(newTodolist)
         //
@@ -102,7 +114,7 @@ export default function TodolistsApp() {
             <ThemedView style={styles.bgc}>
                 <ThemedView style={styles.createBox}>
                     <TextInput style={styles.inputStyle} placeholder={'Create Todolist'} value={value} onChangeText={(text) => setValue(text)}/>
-                    <CustomButton onPress={() =>createTodolist(value)} title={'Add Todolist'} isIcon iconName={'hammer'}  color={'white'} style={styles.buttonStyle}/>
+                    <CustomButton onPress={() =>addTodolist(value)} title={'Add Todolist'} isIcon iconName={'hammer'}  color={'white'} style={styles.buttonStyle}/>
                 </ThemedView>
 
                 {data?.map(todolist => {
@@ -116,7 +128,7 @@ export default function TodolistsApp() {
                         changeTaskStatus={changeStatus}
                         changeTaskTitle={changeTitle}
                         changeTodolistTitle={changeTodolistTitle}
-                        removeTodolist={removeTodolist}
+                        removeTodolist={deleteTodolist}
                     />
                 })}
             </ThemedView>
