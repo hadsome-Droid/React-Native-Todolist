@@ -8,7 +8,7 @@ import {
     useCreateTodolistMutation,
     useGetTodolistsQuery, useRemoveTodolistMutation,
     useUpdateTodolistTitleMutation
-} from "@/services/todolists-api";
+} from "@/services/todolists/todolists.service";
 
 
 export type TaskType = {

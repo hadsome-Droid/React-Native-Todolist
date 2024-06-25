@@ -3,11 +3,17 @@ import Checkbox from 'expo-checkbox';
 import {ThemedView} from "@/components/ThemedView";
 import {ThemedText} from "@/components/ThemedText";
 import {HelloWave} from "@/components/HelloWave";
-import {useEffect, useState} from "react";
+import {useState} from "react";
 import CustomButton from "@/components/customButton/CustomButton";
 import {Input} from "@/components/input/Input";
 import {TaskType} from "@/app/(tabs)/todolistsApp";
-import {useCreateTaskMutation, useGetTasksQuery} from "@/services/tasks-api";
+import {
+    UpdateTaskModelType,
+    useCreateTaskMutation,
+    useGetTasksQuery,
+    useRemoveTaskMutation,
+    useUpdateTaskTitleMutation
+} from "@/services/tasks/tasks.service";
 type Filter = 'all' | 'active' | 'completed'
 
 type Props = {
@@ -36,17 +42,21 @@ export default function Todolist({
                                  }: Props) {
     const [value, setValue] = useState('')
     const [show, setShow] = useState('')
-    const [testTasks, setTestTasks] = useState<TaskType[]>(tasks || [])
     const [selectedButton, setSelectedButton] = useState<Filter>('all');
 
     const {data, isLoading, error} = useGetTasksQuery(todolistId)
     const [createTask] = useCreateTaskMutation()
+    const [removeTask] = useRemoveTaskMutation()
+    const [updateTaskTitle] = useUpdateTaskTitleMutation()
+
 
     console.log('+++tasks', data?.items)
 
-    // useEffect(() => {
-    //     // setTestTasks(changeFilter(selectedButton));
-    // }, [tasks, selectedButton]);
+    if(isLoading) {
+        return <ThemedView>
+            <ThemedText style={{fontWeight: 'bold', fontSize: 28}}>Loading...</ThemedText>
+        </ThemedView>
+    }
 
     const handlePress = (buttonName: Filter) => {
         setSelectedButton(buttonName);
@@ -64,8 +74,8 @@ export default function Todolist({
         setValue('')
     }
 
-    const removeTask = (id: string) => {
-        deleteTask(todolistId, id)
+    const removeHandlerTask = (id: string) => {
+        removeTask({todolistId, taskId: id})
     }
 
     const changeStatus = (id: string, isDone: boolean) => {
@@ -73,7 +83,8 @@ export default function Todolist({
     }
 
     const changeTitle = (id: string, newTitle: string) => {
-        changeTaskTitle(todolistId, id, newTitle)
+        console.log('task-test',data?.item[id])
+        // updateTaskTitle({todolistId, taskId: id, title: newTitle})
         setShow('')
     }
 
@@ -127,7 +138,7 @@ export default function Todolist({
                                 : <ThemedText type={'default'} key={task.id} onPress={() => setShow(task.id)}>
                                     {task.title}
                                     <CustomButton title={''}
-                                                  onPress={() => removeTask(task.id)}
+                                                  onPress={() => removeHandlerTask(task.id)}
                                                   isIcon={true}
                                                   iconName={'trash'}
                                                   color={'red'}/></ThemedText>
