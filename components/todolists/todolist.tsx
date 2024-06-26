@@ -3,7 +3,7 @@ import Checkbox from 'expo-checkbox';
 import {ThemedView} from "@/components/ThemedView";
 import {ThemedText} from "@/components/ThemedText";
 import {HelloWave} from "@/components/HelloWave";
-import {useState} from "react";
+import {ChangeEvent, useState} from "react";
 import CustomButton from "@/components/customButton/CustomButton";
 import {Input} from "@/components/input/Input";
 import {TaskType} from "@/app/(tabs)/todolistsApp";
@@ -14,6 +14,9 @@ import {
     useRemoveTaskMutation,
     useUpdateTaskTitleMutation
 } from "@/services/tasks/tasks.service";
+import {TaskStatuses} from "@/enums/common.enums";
+
+
 type Filter = 'all' | 'active' | 'completed'
 
 type Props = {
@@ -49,19 +52,18 @@ export default function Todolist({
     const [removeTask] = useRemoveTaskMutation()
     const [updateTaskTitle] = useUpdateTaskTitleMutation()
 
-
     console.log('+++tasks', data?.items)
 
-    if(isLoading) {
+    if (isLoading) {
         return <ThemedView>
             <ThemedText style={{fontWeight: 'bold', fontSize: 28}}>Loading...</ThemedText>
         </ThemedView>
     }
 
     const handlePress = (buttonName: Filter) => {
-        setSelectedButton(buttonName);
-        // setTestTasks(changeFilter(buttonName))
 
+        setSelectedButton(buttonName);
+        changeFilter(buttonName)
     };
 
     const getButtonStyle = (buttonName: Filter) => {
@@ -70,7 +72,6 @@ export default function Todolist({
 
     const createHandlerTask = () => {
         createTask({todolistId, title: value})
-        // addTask(todolistId, value)
         setValue('')
     }
 
@@ -78,16 +79,45 @@ export default function Todolist({
         removeTask({todolistId, taskId: id})
     }
 
-    const changeStatus = (id: string, isDone: boolean) => {
-        changeTaskStatus(todolistId, id, isDone)
+    const changeStatus = (id: string, status: TaskStatuses) => {
+        let newStatus = status === TaskStatuses.Completed ? TaskStatuses.New : TaskStatuses.Completed
+        let task;
+        if (!isLoading) {
+            task = data.items.find((t: any) => t.id === id)
+            if (task) {
+                const newTaskData: UpdateTaskModelType = {
+                    title: task.title,
+                    description: task.description,
+                    status: newStatus,
+                    priority: task.priority,
+                    startDate: task.startDate,
+                    deadline: task.deadline,
+                };
+                updateTaskTitle({todolistId, taskId: id, newTaskData})
+            }
+        }
     }
 
     const changeTitle = (id: string, newTitle: string) => {
-        console.log('task-test',data?.item[id])
-        // updateTaskTitle({todolistId, taskId: id, title: newTitle})
+        let task;
+        if (!isLoading) {
+            task = data.items.find((t: any) => t.id === id)
+            if (task) {
+                const newTaskData: UpdateTaskModelType = {
+                    title: newTitle,
+                    description: task.description,
+                    status: task.status,
+                    priority: task.priority,
+                    startDate: task.startDate,
+                    deadline: task.deadline,
+                };
+                updateTaskTitle({todolistId, taskId: id, newTaskData})
+            }
+        }
         setShow('')
     }
 
+    // todo refactor
     const changeFilter = (title: Filter) => {
         switch (title) {
             case "active": {
@@ -103,7 +133,6 @@ export default function Todolist({
     }
 
     const handlerChangeTodolistTitle = (todolistId: string, newTitle: string) => {
-        // console.log(todolistId, newTitle)
 
         changeTodolistTitle(todolistId, newTitle)
         setShow('')
@@ -118,7 +147,8 @@ export default function Todolist({
             <ThemedView style={styles.titleContainer}>
                 {show === todolistId
                     ? <Input id={todolistId} title={title} changeTitle={handlerChangeTodolistTitle}/>
-                    : <><ThemedText type="title" onPress={() => setShow(todolistId)}>{title}</ThemedText><HelloWave/> <CustomButton onPress={removeHandlerTodolist} isIcon iconName={'close'} sizeIcon={24}/></>
+                    : <><ThemedText type="title" onPress={() => setShow(todolistId)}>{title}</ThemedText><HelloWave/>
+                        <CustomButton onPress={removeHandlerTodolist} isIcon iconName={'close'} sizeIcon={24}/></>
                 }
 
             </ThemedView>
@@ -131,8 +161,8 @@ export default function Todolist({
                 <ThemedView style={[styles.stepContainer]}>
                     {data?.items.map((task: any) => {
                         return <ThemedView style={[styles.stepContainer, styles.boxTask,]} key={task.id}>
-                            <Checkbox value={task.isDone} style={{borderRadius: 50}}
-                                      onValueChange={() => changeStatus(task.id, task.isDone)}/>
+                            <Checkbox value={task.status === TaskStatuses.Completed} style={{borderRadius: 50}}
+                                      onValueChange={() => changeStatus(task.id, task.status)}/>
                             {show === task.id
                                 ? <Input id={task.id} title={task.title} changeTitle={changeTitle}/>
                                 : <ThemedText type={'default'} key={task.id} onPress={() => setShow(task.id)}>

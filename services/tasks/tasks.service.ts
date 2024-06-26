@@ -10,9 +10,10 @@ export type UpdateTaskModelType = {
     deadline: string;
 };
 
-type UpdateTask = UpdateTaskModelType & {
+type UpdateTask = {
     todolistId: string
     taskId: string
+    newTaskData:UpdateTaskModelType
 }
 
 export const tasksService = todolistsApi.injectEndpoints({
@@ -30,19 +31,22 @@ export const tasksService = todolistsApi.injectEndpoints({
                 }),
                 invalidatesTags: ['Tasks']
             }),
-            updateTaskTitle: builder.mutation<any, any>({
-                query: ({todolistId, taskId, title}) => ({
+            updateTaskTitle: builder.mutation<any, UpdateTask>({
+                query: ({todolistId, taskId, newTaskData}) => ({
                     url: `/todo-lists/${todolistId}/tasks/${taskId}`,
                     method: 'PUT',
-                    body: {title},
+                    body: newTaskData,
                 }),
                 invalidatesTags: ['Tasks']
             }),
             removeTask: builder.mutation<any, any>({
-                query: ({todolistId, taskId}) => ({
+                query: ({
+                            todolistId,
+                            taskId,
+                        }) => ({
                     url: `/todo-lists/${todolistId}/tasks/${taskId}`,
                     method: 'DELETE',
-                    body: {},
+                    body: {}
                 }),
                 invalidatesTags: ['Tasks']
             })
@@ -51,5 +55,5 @@ export const tasksService = todolistsApi.injectEndpoints({
     },
 })
 
-export const {useGetTasksQuery,  useCreateTaskMutation, useUpdateTaskTitleMutation, useRemoveTaskMutation} = tasksService
+export const {useGetTasksQuery, useCreateTaskMutation, useUpdateTaskTitleMutation, useRemoveTaskMutation} = tasksService
 
