@@ -10,7 +10,7 @@ export type UpdateTaskModelType = {
     deadline: string;
 };
 
-type UpdateTask = {
+export type UpdateTask = {
     todolistId: string
     taskId: string
     newTaskData:UpdateTaskModelType

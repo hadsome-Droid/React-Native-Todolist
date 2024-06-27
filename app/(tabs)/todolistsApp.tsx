@@ -11,12 +11,6 @@ import {
 } from "@/services/todolists/todolists.service";
 
 
-export type TaskType = {
-    id: string
-    title: string
-    isDone: boolean
-}
-
 export default function TodolistsApp() {
     const {data, isLoading} = useGetTodolistsQuery()
     const [updateTodolistTitle] = useUpdateTodolistTitleMutation()
@@ -55,30 +49,6 @@ export default function TodolistsApp() {
     //     },
     // )
 
-    const addTask = (todolistId: string, title: string) => {
-        // const newTask = {id: tasks[todolistId].length + 1, title, isDone: false}
-        // if (title.trim() !== '') {
-        //     setTasks({...tasks, [todolistId]: [newTask, ...tasks[todolistId]]})
-        // }
-    }
-
-    const deleteTask = (todolistId: string, taskId: string) => {
-        // setTasks({...tasks, [todolistId]: tasks[todolistId].filter(task => task.id !== taskId)})
-    }
-
-    const changeStatus = (todolistId: string, taskId: string, isDone: boolean) => {
-        // setTasks({
-        //     ...tasks,
-        //     [todolistId]: tasks[todolistId].map(task => task.id === taskId ? {...task, isDone: !isDone} : task)
-        // })
-    }
-
-    const changeTitle = (todolistId: string, taskId: string, newTitle: string) => {
-        // setTasks({
-        //     ...tasks,
-        //     [todolistId]: tasks[todolistId].map((task) => task.id === taskId ? {...task, title: newTitle} : task)
-        // })
-    }
 
     const changeTodolistTitle = (todolistId: string, title: string) => {
         updateTodolistTitle({id: todolistId, title})
@@ -104,8 +74,7 @@ export default function TodolistsApp() {
         // delete tasks[todolistId]
         // setTasks({...tasks})
     }
-    // console.log(todolists)
-    // console.log(tasks)
+
     return (
         <ParallaxScrollView headerImage={<Image
             source={require('@/assets/images/partial-react-logo.png')}
@@ -122,11 +91,6 @@ export default function TodolistsApp() {
                         key={todolist.id}
                         todolistId={todolist.id}
                         title={todolist.title}
-                        // tasks={tasks[todolist.id]}
-                        addTask={addTask}
-                        deleteTask={deleteTask}
-                        changeTaskStatus={changeStatus}
-                        changeTaskTitle={changeTitle}
                         changeTodolistTitle={changeTodolistTitle}
                         removeTodolist={deleteTodolist}
                     />

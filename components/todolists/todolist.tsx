@@ -3,30 +3,35 @@ import Checkbox from 'expo-checkbox';
 import {ThemedView} from "@/components/ThemedView";
 import {ThemedText} from "@/components/ThemedText";
 import {HelloWave} from "@/components/HelloWave";
-import {ChangeEvent, useState} from "react";
+import {useState} from "react";
 import CustomButton from "@/components/customButton/CustomButton";
 import {Input} from "@/components/input/Input";
-import {TaskType} from "@/app/(tabs)/todolistsApp";
 import {
+    UpdateTask,
     UpdateTaskModelType,
     useCreateTaskMutation,
     useGetTasksQuery,
     useRemoveTaskMutation,
     useUpdateTaskTitleMutation
 } from "@/services/tasks/tasks.service";
-import {TaskStatuses} from "@/enums/common.enums";
+import {TaskPriorities, TaskStatuses} from "@/enums/common.enums";
 
+type Task = {
+    title: string;
+    description: string;
+    status: TaskStatuses;
+    priority: TaskPriorities;
+    startDate: string;
+    deadline: string;
+    id: string
+    todolistId: string
+}
 
 type Filter = 'all' | 'active' | 'completed'
 
 type Props = {
     todolistId: string
     title: string
-    tasks?: TaskType[]
-    addTask: (todolistId: string, title: string) => void
-    deleteTask: (todolistId: string, taskId: string) => void
-    changeTaskStatus: (todolistId: string, taskId: string, taskStatus: boolean) => void
-    changeTaskTitle: (todolistId: string, taskId: string, newTitle: string) => void
     changeTodolistTitle: (todolistId: string, newTitle: string) => void
     removeTodolist: (todolistId: string) => void
 }
@@ -35,39 +40,32 @@ type Props = {
 export default function Todolist({
                                      todolistId,
                                      title,
-                                     tasks,
-                                     addTask,
-                                     deleteTask,
-                                     changeTaskTitle,
-                                     changeTaskStatus,
                                      changeTodolistTitle,
                                      removeTodolist
                                  }: Props) {
     const [value, setValue] = useState('')
     const [show, setShow] = useState('')
-    const [selectedButton, setSelectedButton] = useState<Filter>('all');
+    const [filter, setFilter] = useState<Filter>('all');
 
     const {data, isLoading, error} = useGetTasksQuery(todolistId)
     const [createTask] = useCreateTaskMutation()
     const [removeTask] = useRemoveTaskMutation()
     const [updateTaskTitle] = useUpdateTaskTitleMutation()
 
-    console.log('+++tasks', data?.items)
+
 
     if (isLoading) {
-        return <ThemedView>
+        return <ThemedView style={styles.stepContainer}>
             <ThemedText style={{fontWeight: 'bold', fontSize: 28}}>Loading...</ThemedText>
         </ThemedView>
     }
 
     const handlePress = (buttonName: Filter) => {
-
-        setSelectedButton(buttonName);
-        changeFilter(buttonName)
+        setFilter(buttonName);
     };
 
     const getButtonStyle = (buttonName: Filter) => {
-        return selectedButton === buttonName ? [styles.buttonStyle, styles.buttonActive] : [styles.buttonStyle];
+        return filter === buttonName ? [styles.buttonStyle, styles.buttonActive] : [styles.buttonStyle];
     };
 
     const createHandlerTask = () => {
@@ -83,7 +81,7 @@ export default function Todolist({
         let newStatus = status === TaskStatuses.Completed ? TaskStatuses.New : TaskStatuses.Completed
         let task;
         if (!isLoading) {
-            task = data.items.find((t: any) => t.id === id)
+            task = data.items.find((t: Task) => t.id === id)
             if (task) {
                 const newTaskData: UpdateTaskModelType = {
                     title: task.title,
@@ -101,7 +99,7 @@ export default function Todolist({
     const changeTitle = (id: string, newTitle: string) => {
         let task;
         if (!isLoading) {
-            task = data.items.find((t: any) => t.id === id)
+            task = data.items.find((t: Task) => t.id === id)
             if (task) {
                 const newTaskData: UpdateTaskModelType = {
                     title: newTitle,
@@ -117,23 +115,25 @@ export default function Todolist({
         setShow('')
     }
 
-    // todo refactor
+
     const changeFilter = (title: Filter) => {
         switch (title) {
             case "active": {
-                return tasks?.filter(task => !task.isDone)
+                return data?.items.filter((task:Task) => task.status === TaskStatuses.New)
             }
             case "completed": {
-                return tasks?.filter(task => task.isDone)
+                return data?.items.filter((task: Task) => task.status === TaskStatuses.Completed)
             }
             default: {
-                return tasks
+                return data?.items || []
             }
         }
     }
+    const filteredTasks = changeFilter(filter);
+
+    console.log('taskArr', filteredTasks)
 
     const handlerChangeTodolistTitle = (todolistId: string, newTitle: string) => {
-
         changeTodolistTitle(todolistId, newTitle)
         setShow('')
     }
@@ -159,7 +159,7 @@ export default function Todolist({
                     <Button color={'#ff8906'} title={'Add Task'} onPress={createHandlerTask} disabled={value == ''}/>
                 </ThemedView>
                 <ThemedView style={[styles.stepContainer]}>
-                    {data?.items.map((task: any) => {
+                    {filteredTasks.map((task: Task) => {
                         return <ThemedView style={[styles.stepContainer, styles.boxTask,]} key={task.id}>
                             <Checkbox value={task.status === TaskStatuses.Completed} style={{borderRadius: 50}}
                                       onValueChange={() => changeStatus(task.id, task.status)}/>
